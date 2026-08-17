@@ -14,7 +14,7 @@ class Book(models.Model):
         HARD = "Hard"
         SOFT = "Soft"
     title = models.CharField(max_length=100)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ManyToManyField(Author, blank=True)
     cover = models.CharField(
         max_length=5,
         choices=CoverChoices.choices,)
