@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "books",
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -116,7 +119,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-AUTH_USER_MODEL = "auth.User"
+AUTH_USER_MODEL = "user.User"
 
 
 # Email
