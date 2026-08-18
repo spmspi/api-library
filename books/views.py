@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from books.permissions import IsAdminOrIfAuthenticatedReadOnly
 
 from books.models import Book, Author
 from books.serializers import BookSerializer, AuthorSerializer, BookDetailSerializer, BookListSerializer
@@ -8,6 +9,7 @@ from books.serializers import BookSerializer, AuthorSerializer, BookDetailSerial
 class BooksViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.prefetch_related("author").all()
     serializer_class = BookSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -20,4 +22,5 @@ class BooksViewSet(viewsets.ModelViewSet):
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
