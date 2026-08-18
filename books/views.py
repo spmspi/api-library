@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 
 from books.models import Book, Author
-from books.serializers import BookSerializer, AuthorSerializer, BookReviewSerializer
+from books.serializers import BookSerializer, AuthorSerializer, BookDetailSerializer, BookListSerializer
 
 
 class BooksViewSet(viewsets.ModelViewSet):
@@ -11,9 +11,9 @@ class BooksViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == "list":
-            return BookSerializer
+            return BookListSerializer
         elif self.action == "retrieve":
-            return BookReviewSerializer
+            return BookDetailSerializer
         return BookSerializer
 
 
