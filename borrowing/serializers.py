@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from Borrowing.models import Borrowing
+from borrowing.models import Borrowing
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
