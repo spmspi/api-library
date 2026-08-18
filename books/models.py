@@ -14,11 +14,11 @@ class Book(models.Model):
         HARD = "Hard"
         SOFT = "Soft"
     title = models.CharField(max_length=100)
-    author = models.ManyToManyField(Author, blank=True)
+    author = models.ManyToManyField(Author, blank=True, related_name="authors")
     cover = models.CharField(
         max_length=5,
         choices=CoverChoices.choices,)
-    Inventory = models.PositiveIntegerField()
+    inventory = models.PositiveIntegerField()
     daily_free = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):

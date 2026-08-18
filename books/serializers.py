@@ -11,6 +11,13 @@ class AuthorSerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ("id", "title", "author")
+        fields = ("id", "title", "authors")
+
+
+class BookReviewSerializer(serializers.ModelSerializer):
+    authors = AuthorSerializer(many=True, read_only=True)
+    class Meta:
+        model = Book
+        fields = ("id", "title", "authors", "cover", "inventory", "daily_free")
 
 
