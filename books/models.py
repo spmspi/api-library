@@ -9,12 +9,13 @@ class Author(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+
 class Book(models.Model):
     class CoverChoices(models.TextChoices):
         HARD = "Hard"
         SOFT = "Soft"
     title = models.CharField(max_length=100)
-    author = models.ManyToManyField(Author, blank=True, related_name="authors")
+    author = models.ManyToManyField(Author, blank=True, related_name="books")
     cover = models.CharField(
         max_length=5,
         choices=CoverChoices.choices,)
