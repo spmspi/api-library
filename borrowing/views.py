@@ -1,6 +1,11 @@
+from datetime import date
+
 from django.db import transaction
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from books.models import Book
 from borrowing.models import Borrowing
@@ -32,3 +37,22 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             book.inventory -= 1
             book.save()
             serializer.save(user=self.request.user)
+
+    @action(
+        detail=True,
+        methods=["post", "get"],
+        url_path="return",
+        permission_classes=[IsAuthenticated])
+    def return_book(self, request, pk=None):
+        borrowing = self.get_object()
+        if borrowing.actual_return_date is not None:
+            return Response({"Info": "The book had already been returned."}, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            borrowing.actual_return_date = date.today()
+            borrowing.save()
+
+            borrowing.book.inventory += 1
+            borrowing.book.save()
+
+        serializer = BorrowingDetailSerializer(borrowing)
+        return Response(serializer.data, status=status.HTTP_200_OK)

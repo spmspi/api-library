@@ -13,11 +13,12 @@ class BorrowingSerializer(serializers.ModelSerializer):
         model = Borrowing
         fields = ("borrow_date", "expected_return_date", "book")
 
+
 class BorrowingDetailSerializer(BorrowingSerializer):
     user = UserSerializer(read_only=True)
     class Meta:
         model = Borrowing
-        fields = ("borrow_date", "expected_return_date", "book", "user")
+        fields = ("borrow_date", "expected_return_date", "actual_return_date", "book", "user")
 
 class BorrowingCreateSerializer(BorrowingSerializer):
     book = serializers.PrimaryKeyRelatedField(
