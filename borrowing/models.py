@@ -19,6 +19,3 @@ class Borrowing(models.Model):
             overdue_days = (self.actual_return_date - self.expected_return_date).days
             return f"Rent arrears: {overdue_days} days"
         return "The book returned on time"
-
-
-

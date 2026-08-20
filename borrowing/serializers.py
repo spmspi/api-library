@@ -16,14 +16,21 @@ class BorrowingSerializer(serializers.ModelSerializer):
 
 class BorrowingDetailSerializer(BorrowingSerializer):
     user = UserSerializer(read_only=True)
+
     class Meta:
         model = Borrowing
-        fields = ("borrow_date", "expected_return_date", "actual_return_date", "book", "user")
+        fields = (
+            "borrow_date",
+            "expected_return_date",
+            "actual_return_date",
+            "book",
+            "user",
+        )
+
 
 class BorrowingCreateSerializer(BorrowingSerializer):
-    book = serializers.PrimaryKeyRelatedField(
-        queryset=Book.objects.all()
-    )
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
+
     class Meta:
         model = Borrowing
         fields = (
@@ -35,4 +42,3 @@ class BorrowingCreateSerializer(BorrowingSerializer):
         if value.inventory <= 0:
             raise serializers.ValidationError("The book is out of stock.")
         return value
-
