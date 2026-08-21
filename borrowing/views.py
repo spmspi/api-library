@@ -57,7 +57,6 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return BorrowingSerializer
 
     def perform_create(self, serializer):
-
         with transaction.atomic():
             book = serializer.validated_data["book"]
             book.inventory -= 1
