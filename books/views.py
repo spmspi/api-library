@@ -19,7 +19,9 @@ class BooksViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return BookListSerializer
-        elif self.action == "retrieve":
+        if self.action == "update":
+            return BookListSerializer
+        elif self.action == "detail":
             return BookDetailSerializer
         return BookSerializer
 
