@@ -23,7 +23,7 @@ def sample_book(**params):
     defaults = {
         "title": "sample Book",
         "cover": "Hard",
-        "inventory": 1,
+        "inventory": 0,
         "daily_free": 1.3,
     }
     book = Book.objects.create(**defaults)
@@ -37,7 +37,6 @@ def detail_url(book_id):
     return reverse("books:book-detail", args=[book_id])
 
 def sample_borrowing(**params):
-    book1 = sample_book()
 
     defaults = {
         "borrow_date": date.today(),
@@ -56,10 +55,10 @@ class UnauthenticatedBookApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-    #Fixed permissions
-    #def test_borrowing_unauthenticated(self):
-    #    res = self.client.get(BORROWING_URL)
-    #    self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_borrowing_unauthenticated(self):
+        res = self.client.get(BORROWING_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 
@@ -116,9 +115,11 @@ class AuthenticatedBookApiTests(TestCase):
         payload = {
             "borrow_date": date.today(),
             "expected_return_date": date.today() + timedelta(days=7),
-            "book": book,
+            "book": book.id,
         }
-        res = self.client.post(payload, BORROWING_URL, format="json")
+        res = self.client.post(BORROWING_URL, payload, format="json")
+        print("RESPONSE STATUS:", res.status_code)
+        print("RESPONSE DATA:", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 

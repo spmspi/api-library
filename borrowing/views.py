@@ -1,11 +1,11 @@
 from datetime import date
-
 from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from books.models import Book
 from borrowing.models import Borrowing
 from borrowing.serializers import (
     BorrowingSerializer,
@@ -16,7 +16,7 @@ from borrowing.serializers import (
 
 class BorrowingViewSet(viewsets.ModelViewSet):
     queryset = Borrowing.objects.select_related("book", "user").all()
-    serializer_class = BorrowingSerializer
+    permission_classes = (IsAuthenticated, )
 
     @staticmethod
     def _params_to_ints(qs):
@@ -57,6 +57,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return BorrowingSerializer
 
     def perform_create(self, serializer):
+
         with transaction.atomic():
             book = serializer.validated_data["book"]
             book.inventory -= 1
