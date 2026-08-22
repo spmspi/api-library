@@ -2,3 +2,4 @@
 .dockerignore
 .idea
 docker-compose.yml
+.env
