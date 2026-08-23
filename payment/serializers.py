@@ -7,11 +7,6 @@ from user.serializers import UserSerializer
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ("id", "status", "type", "money")
-
-class PaymentListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Payment
         fields = ("id", "status", "type", "borrowing", "money" )
 
 
