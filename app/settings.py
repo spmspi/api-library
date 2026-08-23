@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "borrowing",
     "books",
     "user",
-    "payment"
+    "payment",
 ]
 
 MIDDLEWARE = [
