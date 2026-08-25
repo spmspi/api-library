@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -169,3 +170,10 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_LIMIT = 30 * 60
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+
+CELERY_BEAT_SCHEDULE = {
+    "check-overdue-borrowings-every-morning": {
+        "task": "borrowing.tasks.check_borrowing_in_return_task",
+        "schedule": crontab(hour=7, minute=18),  # Каждый день в 8:00 утра
+    },
+}

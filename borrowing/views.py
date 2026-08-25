@@ -59,6 +59,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         with transaction.atomic():
+            borrowing = serializer.save(user=self.request.user)
             book = serializer.validated_data["book"]
             book.inventory -= 1
             book.save()
@@ -67,7 +68,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 f"<b>New Borrowing!</b>\n"
                 f"Book: {book.title}\n"
                 f"User: {self.request.user}\n"
-                f"Expected return date: "
+                f"Expected return date: {borrowing.expected_return_date}\n"
             )
             transaction.on_commit(lambda: send_notification_task.delay(message))
 
