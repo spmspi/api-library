@@ -174,6 +174,6 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 CELERY_BEAT_SCHEDULE = {
     "check-overdue-borrowings-every-morning": {
         "task": "borrowing.tasks.check_borrowing_in_return_task",
-        "schedule": crontab(hour=7, minute=18),  # Каждый день в 8:00 утра
+        "schedule": crontab(hour=10, minute=00),  # Каждый день в 8:00 утра
     },
 }

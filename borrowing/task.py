@@ -3,10 +3,7 @@ from datetime import date
 
 import requests
 from celery import shared_task
-
-from books.models import Book
 from borrowing.models import Borrowing
-from user.models import User
 
 
 @shared_task
