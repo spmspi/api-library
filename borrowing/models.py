@@ -1,7 +1,6 @@
-from django.db import models
+from django.db import models, transaction
 from books.models import Book
 from user.models import User
-from .task import send_telegram_message
 
 
 class Borrowing(models.Model):
@@ -20,14 +19,6 @@ class Borrowing(models.Model):
             return f"Rent arrears: {overdue_days} days"
         return "The book returned on time"
 
-    def perform_create(self, serializer):
-        borrowing = serializer.save(user=self.request.user)
-        message = (
-            f"<b>New Borrowing!</b>\n"
-            f"Book: {borrowing.book.title}\n"
-            f"User: {borrowing.user.email}\n"
-            f"Expected return date: {borrowing.expected_return_date}"
-        )
-        send_telegram_message.delay_on_commit(message)
+
 
 

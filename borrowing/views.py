@@ -4,6 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from .task import send_notification_task
 
 from books.models import Book
 from borrowing.models import Borrowing
@@ -62,6 +63,13 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             book.inventory -= 1
             book.save()
             serializer.save(user=self.request.user)
+            message = (
+                f"<b>New Borrowing!</b>\n"
+                f"Book: {book.title}\n"
+                f"User: {self.request.user}\n"
+                f"Expected return date: "
+            )
+            transaction.on_commit(lambda: send_notification_task.delay(message))
 
     @action(
         detail=True,
