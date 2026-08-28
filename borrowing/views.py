@@ -1,9 +1,13 @@
 from datetime import date
 from django.db import transaction
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, request
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.urls import reverse
+from payment.models import Payment
+from payment.services import calculate_amount
+from payment.stripe import create_checkout_session
 from .task import send_notification_task
 
 from books.models import Book
@@ -71,6 +75,21 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 f"Expected return date: {borrowing.expected_return_date}\n"
             )
             transaction.on_commit(lambda: send_notification_task.delay(message))
+            money = calculate_amount(borrowing, payment_type=Payment.TypeEnum.PAYMENT)
+            success_url = self.request.build_absolute_uri(reverse("payment:success")) + "?session_id={CHECKOUT_SESSION_ID}"
+            session = create_checkout_session(
+                borrowing=borrowing,
+                money=money,
+                success_url=success_url,
+            )
+
+            Payment.objects.create(
+                borrowing=borrowing,
+                session_url=session.url,
+                session_id=session.id,
+                money=money,
+                type=Payment.TypeEnum.PAYMENT,
+            )
 
     @action(
         detail=True,

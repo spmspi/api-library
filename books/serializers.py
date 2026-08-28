@@ -11,13 +11,13 @@ class AuthorSerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ("title", "daily_free")
+        fields = ("title", "daily_fee")
 
 
 class BookListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ("id", "title", "inventory", "daily_free")
+        fields = ("id", "title", "inventory", "daily_fee")
 
 
 class BookDetailSerializer(BookSerializer):
@@ -29,4 +29,4 @@ class BookDetailSerializer(BookSerializer):
 
     class Meta:
         model = Book
-        fields = ("id", "title", "author", "cover", "inventory", "daily_free")
+        fields = ("id", "title", "author", "cover", "inventory", "daily_fee")

@@ -24,7 +24,7 @@ def sample_book(**params):
         "title": "sample Book",
         "cover": "Hard",
         "inventory": 0,
-        "daily_free": 1.3,
+        "daily_fee": 1.3,
     }
     book = Book.objects.create(**defaults)
     book.author.add(author)

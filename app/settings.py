@@ -170,10 +170,13 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_LIMIT = 30 * 60
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
 CELERY_BEAT_SCHEDULE = {
     "check-overdue-borrowings-every-morning": {
         "task": "borrowing.tasks.check_borrowing_in_return_task",
-        "schedule": crontab(hour=10, minute=00),  # Каждый день в 8:00 утра
+        "schedule": crontab(hour=10, minute=00),
     },
 }

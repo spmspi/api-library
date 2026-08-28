@@ -25,7 +25,7 @@ class Book(models.Model):
         choices=CoverChoices.choices,
     )
     inventory = models.PositiveIntegerField()
-    daily_free = models.DecimalField(max_digits=5, decimal_places=2)
+    daily_fee = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
         return self.title
