@@ -6,7 +6,9 @@ from payment.models import Payment
 
 def calculate_amount(borrowing: Borrowing, payment_type: str) -> Decimal:
     if payment_type == Payment.TypeEnum.FINE:
-        overdue_days = (borrowing.actual_return_date - borrowing.expected_return_date).days
+        overdue_days = (
+            borrowing.actual_return_date - borrowing.expected_return_date
+        ).days
         overdue_days = max(overdue_days, 1)
         return Decimal(overdue_days) * borrowing.book.daily_fee * Decimal("2.0")
 
@@ -16,10 +18,8 @@ def calculate_amount(borrowing: Borrowing, payment_type: str) -> Decimal:
     return Decimal(days) * borrowing.book.daily_fee
 
 
-def create_payment_for_borrowing(borrowing: Borrowing,
-    payment_type: str,
-    session_url: str,
-    session_id: str
+def create_payment_for_borrowing(
+    borrowing: Borrowing, payment_type: str, session_url: str, session_id: str
 ) -> Payment:
     money_to_pay = calculate_amount(borrowing, payment_type)
     return Payment.objects.create(

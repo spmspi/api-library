@@ -14,6 +14,7 @@ from borrowing.serializers import BorrowingSerializer, BorrowingDetailSerializer
 BOOK_URL = reverse("books:book-list")
 BORROWING_URL = reverse("borrowing:borrowing-list")
 
+
 def sample_book(**params):
     author, _ = Author.objects.get_or_create(
         first_name="Test",
@@ -30,11 +31,12 @@ def sample_book(**params):
     book.author.add(author)
     defaults.update(params)
 
-
     return book
+
 
 def detail_url(book_id):
     return reverse("books:book-detail", args=[book_id])
+
 
 def sample_borrowing(**params):
 
@@ -54,12 +56,9 @@ class UnauthenticatedBookApiTests(TestCase):
         res = self.client.get(BOOK_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
-
-
     def test_borrowing_unauthenticated(self):
         res = self.client.get(BORROWING_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
 
 
 class AuthenticatedBookApiTests(TestCase):
@@ -98,9 +97,7 @@ class AuthenticatedBookApiTests(TestCase):
         bor2 = sample_borrowing(user=user2, book=book2)
         bor3 = sample_borrowing(user=user2, book=book3)
 
-        res = self.client.get(
-            BORROWING_URL, {"user_id": f"{self.user.id}"}
-        )
+        res = self.client.get(BORROWING_URL, {"user_id": f"{self.user.id}"})
 
         serializer1 = BorrowingSerializer(bor1)
         serializer2 = BorrowingSerializer(bor2)
@@ -121,8 +118,3 @@ class AuthenticatedBookApiTests(TestCase):
         print("RESPONSE STATUS:", res.status_code)
         print("RESPONSE DATA:", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-
-
-

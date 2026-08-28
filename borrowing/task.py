@@ -10,18 +10,20 @@ from borrowing.models import Borrowing
 def check_borrowing_in_return_task():
     not_return = Borrowing.objects.filter(
         expected_return_date__lt=date.today(),
-        actual_return_date__isnull=True,).all()
+        actual_return_date__isnull=True,
+    ).all()
     if not not_return:
         send_notification_task("No borrowings overdue today!")
         return
     for borrowing in not_return:
         days_past_due = (date.today() - borrowing.expected_return_date).days
-        message = (f"⚠️Overdue lease⚠️\n"
-                   f"Book title: {borrowing.book.title}\n"
-                   f"Days past due: {days_past_due}\n"
-                   f"User: {borrowing.user.email}\n")
+        message = (
+            f"⚠️Overdue lease⚠️\n"
+            f"Book title: {borrowing.book.title}\n"
+            f"Days past due: {days_past_due}\n"
+            f"User: {borrowing.user.email}\n"
+        )
         send_notification_task.delay(message)
-
 
 
 def send_telegram_message(message: str) -> None:
