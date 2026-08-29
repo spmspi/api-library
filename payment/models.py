@@ -11,7 +11,7 @@ class Payment(models.Model):
         FINE = "Fine"
 
     status = models.CharField(
-        choices=StatusEnum.choices, max_length=10, default=TypeEnum.PAYMENT
+        choices=StatusEnum.choices, max_length=10, default=TypeEnum.PENDING
     )
     type = models.CharField(choices=TypeEnum.choices, max_length=10)
     borrowing = models.ForeignKey(
