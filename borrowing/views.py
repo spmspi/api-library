@@ -75,10 +75,10 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 f"Expected return date: {borrowing.expected_return_date}\n"
             )
             transaction.on_commit(lambda: send_notification_task.delay(message))
-            money = calculate_amount(borrowing, payment_type=Payment.TypeEnum.PAYMENT)
+            money = calculate_amount(borrowing)
             success_url = (
-                self.request.build_absolute_uri(reverse("payment:success"))
-                + "?session_id={CHECKOUT_SESSION_ID}"
+                    self.request.build_absolute_uri(reverse("payment:success"))
+                    + "?session_id={CHECKOUT_SESSION_ID}"
             )
             session = create_checkout_session(
                 borrowing=borrowing,
@@ -93,6 +93,12 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 money=money,
                 type=Payment.TypeEnum.PAYMENT,
             )
+            self.payment_url = session.url
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.data["payment_url"] = self.payment_url
+        return response
 
     @action(
         detail=True,
