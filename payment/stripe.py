@@ -5,7 +5,7 @@ from app import settings
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def create_checkout_session(borrowing, money, success_url):
+def create_checkout_session(borrowing, money, success_url, cancel_url):
     session = stripe.checkout.Session.create(
         line_items=[
             {
@@ -22,6 +22,7 @@ def create_checkout_session(borrowing, money, success_url):
         ],
         mode="payment",
         success_url=success_url,
+        cancel_url=cancel_url,
     )
 
     return session

@@ -42,7 +42,8 @@ class PaymentSuccessView(APIView):
                 f"<b>Payment successful!</b>\n"
                 f"Book: {payment.borrowing.book.title} \n"
                 f"User: {payment.borrowing.user}\n"
-                f"Money paid: {payment.money} USD\n")
+                f"Money paid: {payment.money} USD\n"
+            )
 
             transaction.on_commit(lambda: send_notification_task.delay(message))
             return Response({"detail": "Payment successful"}, status=status.HTTP_200_OK)
@@ -50,4 +51,11 @@ class PaymentSuccessView(APIView):
         return Response(
             {"detail": "Payment not completed"},
             status=status.HTTP_402_PAYMENT_REQUIRED,
+        )
+
+class PaymentCancelView(APIView):
+    def get(self, request):
+        return Response(
+            {"detail": "Payment was cancelled. You can pay later from your borrowings."},
+            status=status.HTTP_200_OK,
         )

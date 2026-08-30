@@ -77,9 +77,10 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             transaction.on_commit(lambda: send_notification_task.delay(message))
             money = calculate_amount(borrowing)
             success_url = (
-                    self.request.build_absolute_uri(reverse("payment:success"))
-                    + "?session_id={CHECKOUT_SESSION_ID}"
+                self.request.build_absolute_uri(reverse("payment:success"))
+                + "?session_id={CHECKOUT_SESSION_ID}"
             )
+            cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
             session = create_checkout_session(
                 borrowing=borrowing,
                 money=money,
