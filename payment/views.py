@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from django.db import transaction
 
-import payment
+import stripe
 from borrowing.task import send_notification_task
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -26,18 +26,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
             return PaymentDetailSerializer
         return PaymentSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-        message = (
-            f"<b>New payments!</b>\n"
-            f"Book: {payment.borrowing.book.title}\n"
-            f"User: {self.request.user}\n"
-            f"Expected return date: {payment.money}\n"
-        )
-        transaction.on_commit(lambda: send_notification_task.delay(message))
-
 
 class PaymentSuccessView(APIView):
     def get(self, request):
+
         session_id = request.query_params.get("session_id")
-        return Response({"detail": "Payment successful"}, status=status.HTTP_200_OK)
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment = Payment.objects.get(session_id=session_id)
+        if session.payment_status == "paid":
+            payment.status = Payment.StatusEnum.PAID
+            payment.save()
+            message = (
+                f"<b>Payment successful!</b>\n"
+                f"Book: {payment.borrowing.book.title} \n"
+                f"User: {payment.borrowing.user}\n"
+                f"Money paid: {payment.money} USD\n")
+            transaction.on_commit(lambda: send_notification_task.delay(message))
+            return Response({"detail": "Payment successful"}, status=status.HTTP_200_OK)

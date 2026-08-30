@@ -1,8 +1,6 @@
 import stripe
-from django.shortcuts import redirect
 
 from app import settings
-from payment.services import calculate_amount
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
