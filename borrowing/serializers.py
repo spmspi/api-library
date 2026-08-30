@@ -1,5 +1,7 @@
-from rest_framework import serializers
+from datetime import date
 
+from rest_framework import serializers
+from django.utils import timezone
 from books.models import Book
 from books.serializers import BookSerializer
 from borrowing.models import Borrowing
@@ -42,3 +44,9 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         if value.inventory <= 0:
             raise serializers.ValidationError("The book is out of stock.")
         return value
+
+    def validate_expected_return_date(self, value):
+        if value < timezone.now().date():
+            raise serializers.ValidationError("You must specify a date later than today.")
+        return value
+
