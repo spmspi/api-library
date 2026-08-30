@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from django.db import transaction
 
 import stripe
+
+from books.permissions import IsAdminOrReadOnly, IsAdminOrIfAuthenticatedReadOnly
 from borrowing.task import send_notification_task
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,6 +14,7 @@ from payment.serializers import PaymentSerializer, PaymentDetailSerializer
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly, )
 
     def get_queryset(self):
         current_user = self.request.user

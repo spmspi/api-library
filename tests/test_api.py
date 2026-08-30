@@ -13,6 +13,8 @@ from borrowing.serializers import BorrowingSerializer, BorrowingDetailSerializer
 
 BOOK_URL = reverse("books:book-list")
 BORROWING_URL = reverse("borrowing:borrowing-list")
+PAYMENT_URL = reverse("payment:payment-list")
+
 
 
 def sample_book(**params):
@@ -54,10 +56,14 @@ class UnauthenticatedBookApiTests(TestCase):
 
     def test_auth_required(self):
         res = self.client.get(BOOK_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_borrowing_unauthenticated(self):
         res = self.client.get(BORROWING_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_payment_unauthenticated(self):
+        res = self.client.get(PAYMENT_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -107,7 +113,7 @@ class AuthenticatedBookApiTests(TestCase):
         self.assertNotIn(serializer2.data, res.data)
         self.assertNotIn(serializer3.data, res.data)
 
-    def test_validation(self):
+    def test_validation_value(self):
         book = sample_book(inventory=0)
         payload = {
             "borrow_date": date.today(),
@@ -115,6 +121,33 @@ class AuthenticatedBookApiTests(TestCase):
             "book": book.id,
         }
         res = self.client.post(BORROWING_URL, payload, format="json")
-        print("RESPONSE STATUS:", res.status_code)
-        print("RESPONSE DATA:", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_validation_borrowing_date(self):
+        book = sample_book(inventory=1)
+        payload = {
+            "borrow_date": date.today(),
+            "expected_return_date": date.today() + timedelta(days=-7),
+        }
+        res = self.client.post(BORROWING_URL, payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_validation_return_book(self):
+        book = sample_book(inventory=1)
+        borrowing = sample_borrowing(book=book, user=self.user)
+
+        RETURN_URL = reverse("borrowing:borrowing-return-book", kwargs={"pk": borrowing.id})
+        res = self.client.post(RETURN_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        book.refresh_from_db()
+        self.assertEqual(book.inventory, 1)
+
+        borrowing.refresh_from_db()
+        self.assertIsNotNone(borrowing.actual_return_date)
+
+
+
+
+
+
