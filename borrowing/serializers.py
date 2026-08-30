@@ -47,5 +47,7 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
 
     def validate_expected_return_date(self, value):
         if value < timezone.now().date():
-            raise serializers.ValidationError("You must specify a date later than today.")
+            raise serializers.ValidationError(
+                "You must specify a date later than today."
+            )
         return value

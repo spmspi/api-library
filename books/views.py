@@ -7,13 +7,14 @@ from books.serializers import (
     BookSerializer,
     AuthorSerializer,
     BookDetailSerializer,
-    BookListSerializer, BookUpdateSerializer,
+    BookListSerializer,
+    BookUpdateSerializer,
 )
 
 
 class BooksViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.prefetch_related("author").all()
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "list":

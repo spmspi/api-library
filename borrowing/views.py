@@ -131,8 +131,8 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 money = calculate_amount(borrowing, payment_type=Payment.TypeEnum.FINE)
 
                 success_url = (
-                        self.request.build_absolute_uri(reverse("payment:success"))
-                        + "?session_id={CHECKOUT_SESSION_ID}"
+                    self.request.build_absolute_uri(reverse("payment:success"))
+                    + "?session_id={CHECKOUT_SESSION_ID}"
                 )
                 cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
 

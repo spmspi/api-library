@@ -14,7 +14,7 @@ from payment.serializers import PaymentSerializer, PaymentDetailSerializer
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly, )
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
         current_user = self.request.user
@@ -56,9 +56,12 @@ class PaymentSuccessView(APIView):
             status=status.HTTP_402_PAYMENT_REQUIRED,
         )
 
+
 class PaymentCancelView(APIView):
     def get(self, request):
         return Response(
-            {"detail": "Payment was cancelled. You can pay later from your borrowings."},
+            {
+                "detail": "Payment was cancelled. You can pay later from your borrowings."
+            },
             status=status.HTTP_200_OK,
         )

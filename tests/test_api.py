@@ -16,7 +16,6 @@ BORROWING_URL = reverse("borrowing:borrowing-list")
 PAYMENT_URL = reverse("payment:payment-list")
 
 
-
 def sample_book(**params):
     author, _ = Author.objects.get_or_create(
         first_name="Test",
@@ -136,7 +135,9 @@ class AuthenticatedBookApiTests(TestCase):
         book = sample_book(inventory=1)
         borrowing = sample_borrowing(book=book, user=self.user)
 
-        RETURN_URL = reverse("borrowing:borrowing-return-book", kwargs={"pk": borrowing.id})
+        RETURN_URL = reverse(
+            "borrowing:borrowing-return-book", kwargs={"pk": borrowing.id}
+        )
         res = self.client.post(RETURN_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -145,9 +146,3 @@ class AuthenticatedBookApiTests(TestCase):
 
         borrowing.refresh_from_db()
         self.assertIsNotNone(borrowing.actual_return_date)
-
-
-
-
-
-
