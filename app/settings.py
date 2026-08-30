@@ -176,7 +176,7 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
 CELERY_BEAT_SCHEDULE = {
     "check-overdue-borrowings-every-morning": {
-        "task": "borrowing.tasks.check_borrowing_in_return_task",
-        "schedule": crontab(hour=10, minute=00),
+        "task": "borrowing.task.check_borrowing_in_return_task",
+        "schedule": crontab(hour=9, minute=10),
     },
 }

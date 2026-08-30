@@ -8,6 +8,7 @@ from django.urls import reverse
 from payment.models import Payment
 from payment.services import calculate_amount
 from payment.stripe import create_checkout_session
+from . import serializers
 from .task import send_notification_task
 
 from books.models import Book
@@ -85,6 +86,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 borrowing=borrowing,
                 money=money,
                 success_url=success_url,
+                cancel_url=cancel_url,
             )
 
             Payment.objects.create(
@@ -109,11 +111,13 @@ class BorrowingViewSet(viewsets.ModelViewSet):
     )
     def return_book(self, request, pk=None):
         borrowing = self.get_object()
+
         if borrowing.actual_return_date is not None:
             return Response(
                 {"Info": "The book had already been returned."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
         with transaction.atomic():
             borrowing.actual_return_date = date.today()
             borrowing.save()
@@ -121,5 +125,38 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             borrowing.book.inventory += 1
             borrowing.book.save()
 
+            payment_url = None
+
+            if borrowing.actual_return_date > borrowing.expected_return_date:
+                money = calculate_amount(borrowing, payment_type=Payment.TypeEnum.FINE)
+
+                success_url = (
+                        self.request.build_absolute_uri(reverse("payment:success"))
+                        + "?session_id={CHECKOUT_SESSION_ID}"
+                )
+                cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
+
+                session = create_checkout_session(
+                    borrowing=borrowing,
+                    money=money,
+                    success_url=success_url,
+                    cancel_url=cancel_url,
+                )
+
+                Payment.objects.create(
+                    borrowing=borrowing,
+                    session_url=session.url,
+                    session_id=session.id,
+                    money=money,
+                    type=Payment.TypeEnum.FINE,
+                    status=Payment.StatusEnum.PENDING,
+                )
+
+                payment_url = session.url
+
         serializer = BorrowingDetailSerializer(borrowing)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = serializer.data
+        if payment_url:
+            data["payment_url"] = payment_url
+
+        return Response(data, status=status.HTTP_200_OK)

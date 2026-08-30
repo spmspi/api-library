@@ -4,7 +4,10 @@ from borrowing.models import Borrowing
 from payment.models import Payment
 
 
-def calculate_amount(borrowing: Borrowing) -> Decimal:
+def calculate_amount(borrowing: Borrowing, payment_type=None) -> Decimal:
+    if payment_type == Payment.TypeEnum.FINE:
+        date = (borrowing.actual_return_date - borrowing.expected_return_date).days
+        return (Decimal(date) * borrowing.book.daily_fee) * 2
 
     date = (borrowing.expected_return_date - borrowing.borrow_date).days
     days = max(date, 1)

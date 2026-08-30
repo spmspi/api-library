@@ -39,7 +39,7 @@ class PaymentSuccessView(APIView):
             payment.save()
 
             message = (
-                f"<b>Payment successful!</b>\n"
+                f"<b>💵Payment successful!💵</b>\n"
                 f"Book: {payment.borrowing.book.title} \n"
                 f"User: {payment.borrowing.user}\n"
                 f"Money paid: {payment.money} USD\n"
