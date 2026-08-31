@@ -1,6 +1,6 @@
 from datetime import date
 from django.db import transaction
-from rest_framework import viewsets, status, request
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,10 +8,10 @@ from django.urls import reverse
 from payment.models import Payment
 from payment.services import calculate_amount
 from payment.stripe import create_checkout_session
-from . import serializers
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from .task import send_notification_task
 
-from books.models import Book
 from borrowing.models import Borrowing
 from borrowing.serializers import (
     BorrowingSerializer,
@@ -160,3 +160,23 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             data["payment_url"] = payment_url
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "Borrowing",
+                type=OpenApiTypes.INT,
+                description="Filter by borrowing user id (ex. ?user_id=2)",
+            ),
+            OpenApiParameter(
+                "Is active (True/False)",
+                type=OpenApiTypes.DATE,
+                description=(
+                        "Filter by borrowing is active or not active "
+                        "(ex. ?is_active=True)"
+                ),
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
