@@ -3,7 +3,7 @@ from django.db import transaction
 
 import stripe
 
-from books.permissions import IsAdminOrReadOnly, IsAdminOrIfAuthenticatedReadOnly
+from books.permissions import IsAdminOrIfAuthenticatedReadOnly
 from borrowing.task import send_notification_task
 from rest_framework.views import APIView
 from rest_framework.response import Response

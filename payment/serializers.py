@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from borrowing.serializers import BorrowingSerializer
 from payment.models import Payment
-from user.serializers import UserSerializer
 
 
 class PaymentSerializer(serializers.ModelSerializer):
