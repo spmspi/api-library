@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from borrowing.serializers import BorrowingSerializer
 from payment.models import Payment
 from user.serializers import UserSerializer
 
@@ -11,7 +12,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class PaymentDetailSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    borrowing = BorrowingSerializer(read_only=True)
 
     class Meta:
         model = Payment
@@ -19,8 +20,6 @@ class PaymentDetailSerializer(serializers.ModelSerializer):
             "status",
             "type",
             "borrowing",
-            "user",
-            "session_id",
             "session_url",
             "money",
         )

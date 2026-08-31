@@ -25,7 +25,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return queryset.filter(borrowing__user=current_user)
 
     def get_serializer_class(self):
-        if self.action == "detail":
+        if self.action == "retrieve":
             return PaymentDetailSerializer
         return PaymentSerializer
 

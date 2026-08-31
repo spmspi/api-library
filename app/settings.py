@@ -119,11 +119,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Kyiv"
 
 USE_I18N = True
 
 USE_TZ = True
+
+CELERY_ENABLE_UTC = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -177,6 +179,6 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 CELERY_BEAT_SCHEDULE = {
     "check-overdue-borrowings-every-morning": {
         "task": "borrowing.task.check_borrowing_in_return_task",
-        "schedule": crontab(hour=9, minute=10),
+        "schedule": crontab(hour=9, minute=00),
     },
 }

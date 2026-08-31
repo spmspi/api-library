@@ -3,6 +3,8 @@ from datetime import date
 
 import requests
 from celery import shared_task
+
+from app import settings
 from borrowing.models import Borrowing
 
 
@@ -11,9 +13,9 @@ def check_borrowing_in_return_task():
     not_return = Borrowing.objects.filter(
         expected_return_date__lt=date.today(),
         actual_return_date__isnull=True,
-    ).all()
+    )
     if not not_return:
-        send_notification_task("No borrowings overdue today!")
+        send_telegram_message("No borrowings overdue today!")
         return
     for borrowing in not_return:
         days_past_due = (date.today() - borrowing.expected_return_date).days
@@ -23,12 +25,12 @@ def check_borrowing_in_return_task():
             f"Days past due: {days_past_due}\n"
             f"User: {borrowing.user.email}\n"
         )
-        send_notification_task.delay(message)
+        send_telegram_message(message)
 
 
 def send_telegram_message(message: str) -> None:
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    token = settings.TELEGRAM_BOT_TOKEN
+    chat_id = settings.TELEGRAM_CHAT_ID
 
     if not token or not chat_id:
         return
