@@ -172,8 +172,8 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 "Is active (True/False)",
                 type=OpenApiTypes.DATE,
                 description=(
-                        "Filter by borrowing is active or not active "
-                        "(ex. ?is_active=True)"
+                    "Filter by borrowing is active or not active"
+                    "(ex. ?is_active=True)"
                 ),
             ),
         ]
