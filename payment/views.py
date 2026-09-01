@@ -52,7 +52,9 @@ class PaymentSuccessView(APIView):
                 )
 
                 transaction.on_commit(lambda: send_notification_task.delay(message))
-                return Response({"detail": "Payment successful"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"detail": "Payment successful"}, status=status.HTTP_200_OK
+                )
 
         return Response(
             {"detail": "Payment not completed"},
@@ -68,6 +70,7 @@ class PaymentCancelView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
 
 @csrf_exempt
 def stripe_webhook_view(request):
