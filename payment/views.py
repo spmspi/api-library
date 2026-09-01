@@ -40,9 +40,7 @@ class PaymentSuccessView(APIView):
         session = stripe.checkout.Session.retrieve(session_id)
         payment = Payment.objects.get(session_id=session_id)
         with transaction.atomic():
-            if session.payment_status == "paid":
-                payment.status = Payment.StatusEnum.PAID
-                payment.save()
+            if payment.status != Payment.StatusEnum.PAID:
 
                 message = (
                     f"<b>💵Payment successful!💵</b>\n"

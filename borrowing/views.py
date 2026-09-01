@@ -46,9 +46,9 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         is_active = self.request.query_params.get("is_active")
 
         if is_active is not None:
-            if is_active.lower() in "true":
+            if is_active.lower() == "true":
                 queryset = queryset.filter(actual_return_date__isnull=True)
-            elif is_active.lower() in "false":
+            elif is_active.lower() == "false":
                 queryset = queryset.filter(actual_return_date__isnull=False)
 
         return queryset
@@ -109,7 +109,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["post", "get"],
+        methods=["post"],
         url_path="return",
         permission_classes=[IsAuthenticated],
     )
