@@ -35,11 +35,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
 class PaymentSuccessView(APIView):
     def get(self, request):
-
-        session_id = request.query_params.get("session_id")
-        session = stripe.checkout.Session.retrieve(session_id)
-        payment = Payment.objects.get(session_id=session_id)
-
         return Response(
             {"detail": "Payment is begin processed"},
             status=status.HTTP_200_OK,
@@ -75,18 +70,19 @@ def stripe_webhook_view(request):
     if event.type == "checkout.session.completed":
         session = event.data.object
         try:
-            payment = Payment.objects.get(session_id=session.id)
-            payment.status = Payment.StatusEnum.PAID
+            with transaction.atomic():
+                payment = Payment.objects.get(session_id=session.id)
+                payment.status = Payment.StatusEnum.PAID
+                payment.save()
 
-            message = (
-                f"<b>💵Payment successful!💵</b>\n"
-                f"Book: {payment.borrowing.book.title} \n"
-                f"User: {payment.borrowing.user}\n"
-                f"Money paid: {payment.money} USD\n"
-            )
-            transaction.on_commit(lambda: send_notification_task.delay(message))
+                message = (
+                    f"<b>💵Payment successful!💵</b>\n"
+                    f"Book: {payment.borrowing.book.title} \n"
+                    f"User: {payment.borrowing.user}\n"
+                    f"Money paid: {payment.money} USD\n"
+                )
+                transaction.on_commit(lambda: send_notification_task.delay(message))
 
-            payment.save()
             print("Payment marked as paid")
         except Payment.DoesNotExist:
             print("Payment not found for this session")
