@@ -39,24 +39,10 @@ class PaymentSuccessView(APIView):
         session_id = request.query_params.get("session_id")
         session = stripe.checkout.Session.retrieve(session_id)
         payment = Payment.objects.get(session_id=session_id)
-        with transaction.atomic():
-            if payment.status != Payment.StatusEnum.PAID:
-
-                message = (
-                    f"<b>💵Payment successful!💵</b>\n"
-                    f"Book: {payment.borrowing.book.title} \n"
-                    f"User: {payment.borrowing.user}\n"
-                    f"Money paid: {payment.money} USD\n"
-                )
-
-                transaction.on_commit(lambda: send_notification_task.delay(message))
-                return Response(
-                    {"detail": "Payment successful"}, status=status.HTTP_200_OK
-                )
 
         return Response(
-            {"detail": "Payment not completed"},
-            status=status.HTTP_402_PAYMENT_REQUIRED,
+            {"detail": "Payment is begin processed"},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -91,6 +77,15 @@ def stripe_webhook_view(request):
         try:
             payment = Payment.objects.get(session_id=session.id)
             payment.status = Payment.StatusEnum.PAID
+
+            message = (
+                f"<b>💵Payment successful!💵</b>\n"
+                f"Book: {payment.borrowing.book.title} \n"
+                f"User: {payment.borrowing.user}\n"
+                f"Money paid: {payment.money} USD\n"
+            )
+            transaction.on_commit(lambda: send_notification_task.delay(message))
+
             payment.save()
             print("Payment marked as paid")
         except Payment.DoesNotExist:
