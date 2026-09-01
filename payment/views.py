@@ -3,6 +3,7 @@ from django.db import transaction
 
 import stripe
 
+from app import settings
 from books.permissions import IsAdminOrIfAuthenticatedReadOnly
 from borrowing.task import send_notification_task
 from rest_framework.views import APIView
@@ -10,6 +11,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from payment.models import Payment
 from payment.serializers import PaymentSerializer, PaymentDetailSerializer
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -65,3 +68,33 @@ class PaymentCancelView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+@csrf_exempt
+def stripe_webhook_view(request):
+    payload = request.body
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        print(f"Error parsing payload: {e}")
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        print(f"Error verifying webhook signature: {e}")
+        return HttpResponse(status=400)
+
+    if event.type == "checkout.session.completed":
+        session = event.data.object
+        try:
+            payment = Payment.objects.get(session_id=session.id)
+            payment.status = Payment.StatusEnum.PAID
+            payment.save()
+            print("Payment marked as paid")
+        except Payment.DoesNotExist:
+            print("Payment not found for this session")
+    else:
+        print(f"Unhandled event type {event.type}")
+
+    return HttpResponse(status=200)
