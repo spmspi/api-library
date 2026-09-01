@@ -68,33 +68,44 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             book = serializer.validated_data["book"]
             book.inventory -= 1
             book.save()
-            message = (
-                f"<b>New Borrowing!</b>\n"
-                f"Book: {book.title}\n"
-                f"User: {self.request.user}\n"
-                f"Expected return date: {borrowing.expected_return_date}\n"
-            )
-            transaction.on_commit(lambda: send_notification_task.delay(message))
-            money = calculate_amount(borrowing)
-            success_url = (
-                self.request.build_absolute_uri(reverse("payment:success"))
-                + "?session_id={CHECKOUT_SESSION_ID}"
-            )
-            cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
-            session = create_checkout_session(
-                borrowing=borrowing,
-                money=money,
-                success_url=success_url,
-                cancel_url=cancel_url,
-            )
 
-            Payment.objects.create(
-                borrowing=borrowing,
-                session_url=session.url,
-                session_id=session.id,
-                money=money,
-                type=Payment.TypeEnum.PAYMENT,
-            )
+        payment_url = None
+
+        message = (
+            f"<b>New Borrowing!</b>\n"
+            f"Book: {book.title}\n"
+            f"User: {self.request.user}\n"
+            f"Expected return date: {borrowing.expected_return_date}\n"
+        )
+        transaction.on_commit(lambda: send_notification_task.delay(message))
+        money = calculate_amount(borrowing)
+        success_url = (
+            self.request.build_absolute_uri(reverse("payment:success"))
+            + "?session_id={CHECKOUT_SESSION_ID}"
+        )
+        cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
+        session = create_checkout_session(
+            borrowing=borrowing,
+            money=money,
+            success_url=success_url,
+            cancel_url=cancel_url,
+        )
+
+        Payment.objects.create(
+            borrowing=borrowing,
+            session_url=session.url,
+            session_id=session.id,
+            money=money,
+            type=Payment.TypeEnum.PAYMENT,
+        )
+
+        payment_url = session.url
+        serializer = BorrowingSerializer(borrowing)
+        data = serializer.data
+        if payment_url:
+            data["payment_url"] = payment_url
+
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
@@ -118,34 +129,34 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             borrowing.book.inventory += 1
             borrowing.book.save()
 
-            payment_url = None
+        payment_url = None
 
-            if borrowing.actual_return_date > borrowing.expected_return_date:
-                money = calculate_amount(borrowing, payment_type=Payment.TypeEnum.FINE)
+        if borrowing.actual_return_date > borrowing.expected_return_date:
+            money = calculate_amount(borrowing, payment_type=Payment.TypeEnum.FINE)
 
-                success_url = (
-                    self.request.build_absolute_uri(reverse("payment:success"))
-                    + "?session_id={CHECKOUT_SESSION_ID}"
-                )
-                cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
+            success_url = (
+                self.request.build_absolute_uri(reverse("payment:success"))
+                + "?session_id={CHECKOUT_SESSION_ID}"
+            )
+            cancel_url = self.request.build_absolute_uri(reverse("payment:cancel"))
 
-                session = create_checkout_session(
-                    borrowing=borrowing,
-                    money=money,
-                    success_url=success_url,
-                    cancel_url=cancel_url,
-                )
+            session = create_checkout_session(
+                borrowing=borrowing,
+                money=money,
+                success_url=success_url,
+                cancel_url=cancel_url,
+            )
 
-                Payment.objects.create(
-                    borrowing=borrowing,
-                    session_url=session.url,
-                    session_id=session.id,
-                    money=money,
-                    type=Payment.TypeEnum.FINE,
-                    status=Payment.StatusEnum.PENDING,
-                )
+            Payment.objects.create(
+                borrowing=borrowing,
+                session_url=session.url,
+                session_id=session.id,
+                money=money,
+                type=Payment.TypeEnum.FINE,
+                status=Payment.StatusEnum.PENDING,
+            )
 
-                payment_url = session.url
+            payment_url = session.url
 
         serializer = BorrowingDetailSerializer(borrowing)
         data = serializer.data
@@ -159,14 +170,14 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "Borrowing",
                 type=OpenApiTypes.INT,
-                description="Filter by borrowing user id (ex. ?user_id == 2)",
+                description="Filter by borrowing user id (ex. ?user_id=2)",
             ),
             OpenApiParameter(
                 "Is active (True/False)",
                 type=OpenApiTypes.DATE,
                 description=(
                     "Filter by borrowing is active or not active"
-                    "(ex. ?is_active == True)"
+                    "(ex. ?is_active==True)"
                 ),
             ),
         ]
