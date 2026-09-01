@@ -7,7 +7,7 @@ from payment.models import Payment
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ("id", "status", "type", "borrowing", "money")
+        fields = ("id", "status", "type", "money", "session_url")
 
 
 class PaymentDetailSerializer(serializers.ModelSerializer):
