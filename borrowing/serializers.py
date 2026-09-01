@@ -28,7 +28,7 @@ class BorrowingDetailSerializer(BorrowingSerializer):
         )
 
 
-class BorrowingCreateSerializer(serializers.ModelSerializer):
+class BorrowingCreateSerializer(BorrowingDetailSerializer):
     book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
 
     class Meta:

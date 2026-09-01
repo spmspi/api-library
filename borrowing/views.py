@@ -10,7 +10,7 @@ from payment.services import calculate_amount
 from payment.stripe import create_checkout_session
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
-from .task import send_notification_task
+from borrowing.task import send_notification_task
 
 from borrowing.models import Borrowing
 from borrowing.serializers import (
@@ -68,7 +68,6 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             book = serializer.validated_data["book"]
             book.inventory -= 1
             book.save()
-            serializer.save(user=self.request.user)
             message = (
                 f"<b>New Borrowing!</b>\n"
                 f"Book: {book.title}\n"
@@ -96,12 +95,6 @@ class BorrowingViewSet(viewsets.ModelViewSet):
                 money=money,
                 type=Payment.TypeEnum.PAYMENT,
             )
-            self.payment_url = session.url
-
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.data["payment_url"] = self.payment_url
-        return response
 
     @action(
         detail=True,
@@ -166,14 +159,14 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "Borrowing",
                 type=OpenApiTypes.INT,
-                description="Filter by borrowing user id (ex. ?user_id=2)",
+                description="Filter by borrowing user id (ex. ?user_id == 2)",
             ),
             OpenApiParameter(
                 "Is active (True/False)",
                 type=OpenApiTypes.DATE,
                 description=(
                     "Filter by borrowing is active or not active"
-                    "(ex. ?is_active=True)"
+                    "(ex. ?is_active == True)"
                 ),
             ),
         ]
