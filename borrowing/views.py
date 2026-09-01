@@ -69,15 +69,15 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             book.inventory -= 1
             book.save()
 
-        payment_url = None
+            payment_url = None
 
-        message = (
-            f"<b>New Borrowing!</b>\n"
-            f"Book: {book.title}\n"
-            f"User: {self.request.user}\n"
-            f"Expected return date: {borrowing.expected_return_date}\n"
-        )
-        transaction.on_commit(lambda: send_notification_task.delay(message))
+            message = (
+                f"<b>New Borrowing!</b>\n"
+                f"Book: {book.title}\n"
+                f"User: {self.request.user}\n"
+                f"Expected return date: {borrowing.expected_return_date}\n"
+            )
+            transaction.on_commit(lambda: send_notification_task.delay(message))
         money = calculate_amount(borrowing)
         success_url = (
             self.request.build_absolute_uri(reverse("payment:success"))
